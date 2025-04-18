@@ -1,7 +1,8 @@
 ## Prerequisites
-- Python 3
-- PyTorch 1.0
-- NVIDIA GPU + CUDA cuDNN
+- Python 3.12.1
+- PyTorch 2.6.0
+- NVIDIA GPU
+- CUDA 11.8
 
 ## Installation
 - Clone this repo:
