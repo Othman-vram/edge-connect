@@ -26,7 +26,7 @@ pip3 install -r requirements.txt
 ## Datasets
 We use [CelebA](http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html) and [Quick Draw Irregular Mask Dataset](https://github.com/karfly/qd-imd) by Karim Iskakov which is combination of 50 million strokes drawn by human hand.
 
-Both of the above datasets split into train , test and validation partitions can be downloaded from the following frive folder: [Datasets](https://drive.google.com/file/d/1h4ShlsyeMaRMlQzpF78HGvCNlwe8iECn/view?usp=drive_link)
+Both of the above datasets split into train , test and validation partitions can be downloaded from the following drive folder: [Datasets](https://drive.google.com/file/d/1h4ShlsyeMaRMlQzpF78HGvCNlwe8iECn/view?usp=drive_link)
 
 After downloading, run [`scripts/flist.py`](scripts/flist.py) to generate train, test and validation set file lists. For example, to generate the training set file list on Celeba dataset run:
 ```bash
