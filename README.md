@@ -24,31 +24,28 @@ pip3 install -r requirements.txt
 ```
 
 ## Datasets
-### 1) Images
-We use [Places2](http://places2.csail.mit.edu), [CelebA](http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html) and [Paris Street-View](https://github.com/pathak22/context-encoder) datasets. To train a model on the full dataset, download datasets from official websites. 
+We use [CelebA](http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html) and [Quick Draw Irregular Mask Dataset](https://github.com/karfly/qd-imd) by Karim Iskakov which is combination of 50 million strokes drawn by human hand.
 
-After downloading, run [`scripts/flist.py`](scripts/flist.py) to generate train, test and validation set file lists. For example, to generate the training set file list on Places2 dataset run:
+Both of the above datasets split into train , test and validation partitions can be downloaded from the following frive folder: [Datasets](https://drive.google.com/file/d/1h4ShlsyeMaRMlQzpF78HGvCNlwe8iECn/view?usp=drive_link)
+
+After downloading, run [`scripts/flist.py`](scripts/flist.py) to generate train, test and validation set file lists. For example, to generate the training set file list on Celeba dataset run:
 ```bash
 mkdir datasets
-python ./scripts/flist.py --path path_to_places2_train_set --output ./datasets/places_train.flist
+python ./scripts/flist.py --path path_to_celeba_train_set --output ./datasets/places2_train.flist
 ```
-
-### 2) Irregular Masks
-Our model is trained on the irregular mask dataset provided by [Liu et al.](https://arxiv.org/abs/1804.07723). You can download publically available Irregular Mask Dataset from [their website](http://masc.cs.gmu.edu/wiki/partialconv).
-
-Alternatively, you can download [Quick Draw Irregular Mask Dataset](https://github.com/karfly/qd-imd) by Karim Iskakov which is combination of 50 million strokes drawn by human hand.
-
-Please use [`scripts/flist.py`](scripts/flist.py) to generate train, test and validation set masks file lists as explained above.
+For example, to generate the validation set file list on Masks dataset run:
+```bash
+mkdir datasets
+python ./scripts/flist.py --path path_to_mask_validation_set --output ./datasets/masks_val.flist
+```
+Note that : An example of these files generated on my computer can be found inside of the `./dataset` folder in the github repo
 
 ## Getting Started
 Download the pre-trained models using the following links and copy them under `./checkpoints` directory.
 
 [Places2](https://drive.google.com/drive/folders/158ch9Psjop0mQEdeIp9DKjrYIGTDsZKN) | [CelebA](https://drive.google.com/drive/folders/13JgMA5sKMYgRwHBp4f7PBc5orNJ_Cv-p) | [Paris-StreetView](https://drive.google.com/drive/folders/1hMGVz6Ck3erpP3BRNzG90HNCJl85kveN)
 
-Alternatively, you can run the following script to automatically download the pre-trained models:
-```bash
-bash ./scripts/download_model.sh
-```
+Or you can use the models that i have trained on using only one epoch present in the `./checkpoints` directory.
 
 ### 1) Training
 To train the model, create a `config.yaml` file similar to the [example config file](https://github.com/knazeri/edge-connect/blob/master/config.yml.example) and copy it under your checkpoints directory. Read the [configuration](#model-configuration) guide for more information on model configuration.
