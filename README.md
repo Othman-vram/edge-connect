@@ -53,7 +53,7 @@ To train the model, create a `config.yaml` file similar to the [example config f
 
 Note that the `TRAIN_EDGE_FLIST` `TEST_EDGE_FLIST` `VAL_EDGE_FLIST` shouldn't be changed because we are generting the edges using canny (unless you are importing the edges externaly).
 
-If you get the folloing error while trying to train your models:
+If you get the following error while trying to train your models:
 ```bash
 RuntimeError: one of the variables needed for gradient computation has been modified by an inplace operation: [torch.cuda.FloatTensor [1, 512, 4, 4]] is at version 2; expected version 1 instead.
 ```
