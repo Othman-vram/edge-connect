@@ -7,13 +7,20 @@
 ## Installation
 - Clone this repo:
 ```bash
-git clone https://github.com/knazeri/edge-connect.git
+git clone https://github.com/Othman-vram/edge-connect.git
 cd edge-connect
 ```
-- Install PyTorch and dependencies from http://pytorch.org
+- Creating a python virtual environment:
+```bash
+pyhton -m venv venv
+```
+- Install PyTorch and CUDA:
+```bash
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+```
 - Install python requirements:
 ```bash
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 ## Datasets
