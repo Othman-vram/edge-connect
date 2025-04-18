@@ -57,7 +57,7 @@ If you get the following error while trying to train your models:
 ```bash
 RuntimeError: one of the variables needed for gradient computation has been modified by an inplace operation: [torch.cuda.FloatTensor [1, 512, 4, 4]] is at version 2; expected version 1 instead.
 ```
-Then navigate to the following file `./venv/Lib/site-packages/torch/nn/utils/spectral_norm.py` and this line from this `weight = weight / sigma` to this `weight = weight.clone() / sigma`
+Then navigate to the following file `./venv/Lib/site-packages/torch/nn/utils/spectral_norm.py` and change this line from this `weight = weight / sigma` to this `weight = weight.clone() / sigma`
 EdgeConnect is trained in three stages: 1) training the edge model, 2) training the inpaint model and 3) training the joint model. To train the model:
 ```bash
 python train.py --model [stage] --checkpoints [path to checkpoints]
