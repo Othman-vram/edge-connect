@@ -14,8 +14,8 @@ class BaseModel(nn.Module):
         self.config = config
         self.iteration = 0
 
-        self.gen_weights_path = os.path.join(config.PATH, name + '_gen.pth')
-        self.dis_weights_path = os.path.join(config.PATH, name + '_dis.pth')
+        self.gen_weights_path = os.path.join(config.PATH, name +"_latest_"+ 'gen.pth')
+        self.dis_weights_path = os.path.join(config.PATH, name +"_latest_"+ 'dis.pth')
 
     def load(self):
         if os.path.exists(self.gen_weights_path):
@@ -40,16 +40,30 @@ class BaseModel(nn.Module):
 
             self.discriminator.load_state_dict(data['discriminator'])
 
-    def save(self):
+    def save(self,epoch=None): 
+
         print('\nsaving %s...\n' % self.name)
+        epoch_gen_weights_path = os.path.join(self.config.PATH, self.name+f'_epoch_{epoch}_gen.pth')
+        epoch_dis_weights_path = os.path.join(self.config.PATH, self.name+f'_epoch_{epoch}_dis.pth')
+
+        self.general_save(self.gen_weights_path, self.dis_weights_path)
+        self.general_save(epoch_gen_weights_path, epoch_dis_weights_path)
+
+        return epoch_gen_weights_path, epoch_dis_weights_path,self.name
+
+    def general_save(self, gen_path=None, dis_path=None):
+
         torch.save({
             'iteration': self.iteration,
             'generator': self.generator.state_dict()
-        }, self.gen_weights_path)
+        }, gen_path)
 
         torch.save({
             'discriminator': self.discriminator.state_dict()
-        }, self.dis_weights_path)
+        }, dis_path)
+
+
+
 
 
 class EdgeModel(BaseModel):
