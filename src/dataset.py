@@ -5,11 +5,13 @@ import random
 import numpy as np
 import torchvision.transforms.functional as F
 from torch.utils.data import DataLoader
+import cv2
 from PIL import Image
 from skimage.feature import canny
 from skimage.color import rgb2gray, gray2rgb
 from .utils import create_mask
 from imageio.v2 import imread
+import matplotlib.pyplot as plt
 
 
 class Dataset(torch.utils.data.Dataset):
@@ -27,6 +29,8 @@ class Dataset(torch.utils.data.Dataset):
         self.input_size = config.INPUT_SIZE
         self.sigma = config.SIGMA
         self.edge = config.EDGE
+        self.blur = config.BLUR
+        self.blur_strength = config.BLUR_STRENGTH
         self.mask = config.MASK
         self.nms = config.NMS
 
@@ -91,34 +95,92 @@ class Dataset(torch.utils.data.Dataset):
 
     def load_edge(self, img, index, mask):
         sigma = self.sigma
+        blur_strength = self.blur_strength + 1 - self.blur_strength % 2
+        
+        if self.blur == 1:
+            # in test mode images are masked (with masked regions),
+            # using 'mask' parameter prevents canny to detect edges for the masked regions
+            mask = None if self.training else (1 - mask / 255).astype(np.bool)
 
-        # in test mode images are masked (with masked regions),
-        # using 'mask' parameter prevents canny to detect edges for the masked regions
-        mask = None if self.training else (1 - mask / 255).astype(np.bool)
+            # canny
+            if self.edge == 1:
+                # no edge
+                if sigma == -1:
+                    return np.zeros(img.shape).astype(np.float32)
 
-        # canny
-        if self.edge == 1:
-            # no edge
-            if sigma == -1:
-                return np.zeros(img.shape).astype(np.float32)
+                # random sigma
+                if sigma == 0:
+                    sigma = random.randint(1, 4)
 
-            # random sigma
-            if sigma == 0:
-                sigma = random.randint(1, 4)
+                return canny(cv2.GaussianBlur(img, (blur_strength, blur_strength), 1.4), sigma=sigma, mask=mask).astype(np.float32)
+            
+            # laplacian
+            if self.edge == 2:
+                return cv2.Laplacian(cv2.GaussianBlur(img, (5, 5), 1.4), cv2.CV_64F).astype(np.float32)
 
-            return canny(img, sigma=sigma, mask=mask).astype(np.float32)
+            # scharr
+            if self.edge == 3:
+                Gx = cv2.Scharr(cv2.GaussianBlur(img, (blur_strength, blur_strength), 1.4), cv2.CV_64F, 1, 0)
+                Gy = cv2.Scharr(cv2.GaussianBlur(img, (blur_strength, blur_strength), 1.4), cv2.CV_64F, 0, 1)
+            
+                # Compute the gradient magnitude
+                gradient_magnitude = cv2.magnitude(Gx, Gy)
+                return gradient_magnitude.astype(np.float32)
 
-        # external
+            # external
+            else:
+                imgh, imgw = img.shape[0:2]
+                edge = imread(self.edge_data[index])
+                edge = self.resize(edge, imgh, imgw)
+
+                # non-max suppression
+                if self.nms == 1:
+                    edge = edge * canny(img, sigma=sigma, mask=mask)
+
+                return edge
+        
         else:
-            imgh, imgw = img.shape[0:2]
-            edge = imread(self.edge_data[index])
-            edge = self.resize(edge, imgh, imgw)
+            # in test mode images are masked (with masked regions),
+            # using 'mask' parameter prevents canny to detect edges for the masked regions
+            mask = None if self.training else (1 - mask / 255).astype(np.bool)
 
-            # non-max suppression
-            if self.nms == 1:
-                edge = edge * canny(img, sigma=sigma, mask=mask)
+            # canny
+            if self.edge == 1:
+                # no edge
+                if sigma == -1:
+                    return np.zeros(img.shape).astype(np.float32)
 
-            return edge
+                # random sigma
+                if sigma == 0:
+                    sigma = random.randint(1, 4)
+
+                return canny(img, sigma=sigma, mask=mask).astype(np.float32)
+            
+            # laplacian
+            if self.edge == 2:
+                return cv2.Laplacian(img, cv2.CV_64F).astype(np.float32)
+
+            # scharr
+            if self.edge == 3:
+                Gx = cv2.Scharr(img, cv2.CV_64F, 1, 0)
+                Gy = cv2.Scharr(img, cv2.CV_64F, 0, 1)
+            
+                # Compute the gradient magnitude
+                gradient_magnitude = cv2.magnitude(Gx, Gy)
+            
+                return gradient_magnitude.astype(np.float32)
+
+            # external
+            else:
+                imgh, imgw = img.shape[0:2]
+                edge = imread(self.edge_data[index])
+                edge = self.resize(edge, imgh, imgw)
+
+                # non-max suppression
+                if self.nms == 1:
+                    edge = edge * canny(img, sigma=sigma, mask=mask)
+
+                return edge
 
     def load_mask(self, img, index):
         imgh, imgw = img.shape[0:2]

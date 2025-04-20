@@ -87,7 +87,6 @@ class EdgeConnect():
             return self.inpaint_model.save(epoch=epoch)
 
         else:
-            
             edge_result = self.edge_model.save(epoch=epoch)[:-1]
             inpaint_result = self.inpaint_model.save(epoch=epoch)[:-1]
 
@@ -113,8 +112,7 @@ class EdgeConnect():
             return
 
         num_batches = len(train_loader)
-        iteration = self.starting_iteration  # Initialize iteration counter
-        mlflow.set_tracking_uri(uri=self.config.MLFLOW_TRACKING_URI)
+        iteration = 0  # Initialize iteration counter
 
         # Create a new MLflow Experiment
         mlflow.set_experiment(self.config.EXPERIMENT_NAME)
@@ -123,16 +121,71 @@ class EdgeConnect():
         run_id = self.config.MLFLOW_RUN_ID or None
 
         while (mlflow.start_run(run_id=run_id)):
-            mlflow.set_tag("MODEL", self.config.MODEL)
-            mlflow.log_param("batch_size", self.config.BATCH_SIZE)
-            mlflow.log_param("learning_rate", self.config.LR)
-            mlflow.log_param("model", self.config.MODEL)
-            mlflow.log_param("max_epochs", self.config.MAX_EPOCHS)
-            mlflow.log_param("input_size", self.config.INPUT_SIZE)
-            mlflow.log_param("training_metrics_logging_interval", self.config.LOG_INTERVAL)
-            mlflow.log_param("validation_metrics_logging_interval", "Eevery epoc")
-            mlflow.log_param("running_validation_tests", "Eevery epoch")
 
+            if self.config.MODEL == 1:
+                mlflow.log_param("Model training mode", "Edge generation only")
+            elif self.config.MODEL == 2:
+                mlflow.log_param("Model training mode", "Inpainting only")
+            elif self.config.MODEL == 3:
+                mlflow.log_param("Model training mode", "Edge generation, then inpainting")
+            elif self.config.MODEL == 4:
+                mlflow.log_param("Model training mode", "Joint model")
+
+            if self.config.MASK == 1:
+                mlflow.log_param("Mask type", "Random block")
+            elif self.config.MASK == 2:
+                mlflow.log_param("Mask type", "Half mask")
+            elif self.config.MASK == 3:
+                mlflow.log_param("Mask type", "External mask")
+            elif self.config.MASK == 4:
+                mlflow.log_param("Mask type", "External mask + Random block")
+            elif self.config.MASK == 5:
+                mlflow.log_param("Mask type", "External mask + Random block + Half mask")
+
+            if self.config.EDGE == 1:
+                mlflow.log_param("Edge generation type", "Canny")
+            elif self.config.EDGE == 2:
+                mlflow.log_param("Edge generation type", "Laplacian")
+            elif self.config.EDGE == 3:
+                mlflow.log_param("Edge generation type", "Sharr")
+            elif self.config.EDGE == 4:
+                mlflow.log_param("Edge generation type", "External")
+
+            mlflow.log_param("Blur", "On" if self.config.BLUR ==1 else "Off")
+            if self.config.BLUR == 1:
+                mlflow.log_param("Blur strength", self.config.BLUR_STRENGTH)
+
+            if self.config.EDGE == 1:
+                mlflow.log_param("Sigma Canny", self.config.SIGMA)
+
+            mlflow.log_param("Seed", self.config.SEED)
+
+            mlflow.log_param("Learning rate", self.config.LR)
+
+            mlflow.log_param("Discriminator/Generator Learning rate ratio", self.config.D2G_LR)
+
+            mlflow.log_param("Beta 1", self.config.BETA1)
+            mlflow.log_param("Beta 2", self.config.BETA2)
+
+            mlflow.log_param("Batch size", self.config.BATCH_SIZE)
+            mlflow.log_param("Input size", self.config.INPUT_SIZE)
+
+            mlflow.log_param("Max iterations", self.config.MAX_ITERS)
+            mlflow.log_param("Max epochs", self.config.MAX_EPOCHS)
+
+            mlflow.log_param("Edge threshold", self.config.EDGE_THRESHOLD)
+            mlflow.log_param("L1 loss weight", self.config.L1_LOSS_WEIGHT)
+            mlflow.log_param("FM loss weight", self.config.FM_LOSS_WEIGHT)
+            mlflow.log_param("Style loss weight", self.config.STYLE_LOSS_WEIGHT)
+            mlflow.log_param("Content loss weight", self.config.CONTENT_LOSS_WEIGHT)
+            mlflow.log_param("Inpaint adversarial loss weight", self.config.INPAINT_ADV_LOSS_WEIGHT)
+
+            mlflow.log_param("GAN loss", self.config.GAN_LOSS)
+            mlflow.log_param("GAN fake images pool size", self.config.GAN_POOL_SIZE)
+
+            mlflow.log_param("Training metrics logging interval", self.config.LOG_INTERVAL)
+            mlflow.log_param("Validation metrics logging interval", "Every epoch")
+            mlflow.log_param("Test metrics logging interval", "Every epoch")
 
             for epoch in range(self.starting_epoch, max_epoch + 1):
                 print(f'\n\nTraining epoch: {epoch}')

@@ -31,6 +31,7 @@ DEFAULT_CONFIG = {
     'MODEL': 1,                     # 1: edge model, 2: inpaint model, 3: edge-inpaint model, 4: joint model
     'MASK': 3,                      # 1: random block, 2: half, 3: external, 4: (external, random block), 5: (external, random block, half)
     'EDGE': 1,                      # 1: canny, 2: external
+    'BLUR': 0,                      # turns on blurring before computing edges  
     'NMS': 1,                       # 0: no non-max-suppression, 1: applies non-max-suppression on the external edges by multiplying by Canny
     'SEED': 10,                     # random seed
     'GPU': [0],                     # list of gpu ids
@@ -45,6 +46,7 @@ DEFAULT_CONFIG = {
     'INPUT_SIZE': 256,              # input image size for training 0 for original size
     'SIGMA': 2,                     # standard deviation of the Gaussian filter used in Canny edge detector (0: random, -1: no edge)
     'MAX_ITERS': 2e6,               # maximum number of iterations to train the model
+    'MAX_EPOCHS': 200,               # maximum number of epochs to train the model
 
     'EDGE_THRESHOLD': 0.5,          # edge detection threshold
     'L1_LOSS_WEIGHT': 1,            # l1 loss weight
