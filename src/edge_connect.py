@@ -50,6 +50,23 @@ class EdgeConnect():
             self.debug = True
 
         self.log_file = os.path.join(config.PATH, 'log_' + model_name + '.dat')
+        self.starting_epoch = 1
+        self.starting_iteration = 0
+
+        if os.path.exists(self.log_file):
+            with open(self.log_file, 'r') as f:
+                lines = [line.strip() for line in f if line.strip()]
+                if lines:
+                    last_line = lines[-1]
+                    try:
+                        parts = last_line.split()
+                        last_epoch = int(parts[0])
+                        last_iteration = int(parts[1])
+                        self.starting_epoch = last_epoch
+                        self.starting_iteration = last_iteration
+                    except (IndexError, ValueError):
+                        print("⚠️ Failed to parse epoch from log file. Starting from epoch 1.")
+
 
     def load(self):
         if self.config.MODEL == 1:
@@ -74,7 +91,7 @@ class EdgeConnect():
             edge_result = self.edge_model.save(epoch=epoch)[:-1]
             inpaint_result = self.inpaint_model.save(epoch=epoch)[:-1]
 
-            return edge_result + inpaint_result +("JointModel",)    
+            return edge_result + inpaint_result +(f"JointModel_MODE_{self.config.MODEL}",)    
 
 
     def train(self):
@@ -96,20 +113,28 @@ class EdgeConnect():
             return
 
         num_batches = len(train_loader)
-        iteration = 0  # Initialize iteration counter
-        mlflow.set_tracking_uri(uri="http://127.0.0.1:5000")
+        iteration = self.starting_iteration  # Initialize iteration counter
+        mlflow.set_tracking_uri(uri=self.config.MLFLOW_TRACKING_URI)
 
         # Create a new MLflow Experiment
         mlflow.set_experiment(self.config.EXPERIMENT_NAME)
 
-        while (mlflow.start_run()):
+        #mlflow run_id
+        run_id = self.config.MLFLOW_RUN_ID or None
 
+        while (mlflow.start_run(run_id=run_id)):
+            mlflow.set_tag("MODEL", self.config.MODEL)
             mlflow.log_param("batch_size", self.config.BATCH_SIZE)
             mlflow.log_param("learning_rate", self.config.LR)
             mlflow.log_param("model", self.config.MODEL)
             mlflow.log_param("max_epochs", self.config.MAX_EPOCHS)
+            mlflow.log_param("input_size", self.config.INPUT_SIZE)
+            mlflow.log_param("training_metrics_logging_interval", self.config.LOG_INTERVAL)
+            mlflow.log_param("validation_metrics_logging_interval", "Eevery epoc")
+            mlflow.log_param("running_validation_tests", "Eevery epoch")
 
-            for epoch in range(1, max_epoch + 1):
+
+            for epoch in range(self.starting_epoch, max_epoch + 1):
                 print(f'\n\nTraining epoch: {epoch}')
 
                 progbar = Progbar(total_samples, width=20, stateful_metrics=['epoch', 'iter'])
@@ -181,6 +206,18 @@ class EdgeConnect():
                         logs.extend([('psnr', psnr.item()), ('mae', mae.item())])
                         self.inpaint_model.backward(gen_loss, dis_loss)
 
+                        running_logs = defaultdict(list)
+                        for log_name, log_value in model_logs:
+                            running_logs[log_name].append(log_value)
+                        running_logs["psnr"].append(psnr.item())
+                        running_logs["mae"].append(mae.item())
+
+                        if iteration % self.config.LOG_INTERVAL == 0:
+                            for key, values in running_logs.items():
+                                smoothed = np.mean(values)
+                                mlflow.log_metric(key, smoothed, step=iteration)
+                            running_logs.clear()
+
                     # joint model
                     else:
                         e_outputs, e_gen_loss, e_dis_loss, e_logs = self.edge_model.process(images_gray, edges, masks)
@@ -196,6 +233,22 @@ class EdgeConnect():
                         logs.extend([('psnr', psnr.item()), ('mae', mae.item())])
                         self.inpaint_model.backward(i_gen_loss, i_dis_loss)
                         self.edge_model.backward(e_gen_loss, e_dis_loss)
+
+                        running_logs = defaultdict(list)
+                        for log_name, log_value in e_logs:
+                            running_logs[log_name].append(log_value)
+                        for log_name, log_value in i_logs:
+                            running_logs[log_name].append(log_value)
+                        running_logs["psnr"].append(psnr.item())
+                        running_logs["mae"].append(mae.item())
+                        running_logs["precision"].append(precision.item())
+                        running_logs["recall"].append(recall.item())
+
+                        if iteration % self.config.LOG_INTERVAL == 0:
+                            for key, values in running_logs.items():
+                                smoothed = np.mean(values)
+                                mlflow.log_metric(key, smoothed, step=iteration)
+                            running_logs.clear()
 
                     current_batch_size = len(images)
                     batch_logs = [
@@ -223,7 +276,6 @@ class EdgeConnect():
                 result = list(result)
 
                 files_to_zip = result[:-1]
-                print(files_to_zip)
                 model_name = result[-1]
 
                 epoch_number = epoch 

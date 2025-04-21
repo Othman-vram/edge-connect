@@ -21,6 +21,6 @@ def walk_and_invert(root_dir):
                 invert_image(full_path)
 
 # Replace this with your target directory
-target_directory = "C:/Users/elidr/Desktop/Projet-RL/test_pytorch/data/masks/"
+target_directory = ""
 
 walk_and_invert(target_directory)
