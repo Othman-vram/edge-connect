@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -p mesonet
 #SBATCH -N 1
-#SBATCH -c 20
+#SBATCH -c 60
 #SBATCH --gres=gpu:1
 #SBATCH --time=10:00:00
 #SBATCH --mem=256

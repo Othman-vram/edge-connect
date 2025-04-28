@@ -1,0 +1,15 @@
+artifact_uri: file:///home/tompoget/edge-connect/mlruns/816274459135410690/515b17c39d14456faa936cd55c87a1ff/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '816274459135410690'
+lifecycle_stage: active
+run_id: 515b17c39d14456faa936cd55c87a1ff
+run_name: useful-bass-439
+run_uuid: 515b17c39d14456faa936cd55c87a1ff
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1745709112987
+status: 1
+tags: []
+user_id: tompoget
