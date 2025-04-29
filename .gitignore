@@ -4,5 +4,7 @@ data.zip
 data/
 *.out
 *.png
+*.jpg
+*.jpeg
 *.zip
 old/
