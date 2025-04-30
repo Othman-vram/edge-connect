@@ -1,8 +1,9 @@
 artifact_uri: file:///home/tompoget/edge-connect/mlruns/907478214570418903/9b7fd81cd5254c1897736fd090f678a2/artifacts
+deleted_time: 1745932817297
 end_time: null
 entry_point_name: ''
 experiment_id: '907478214570418903'
-lifecycle_stage: active
+lifecycle_stage: deleted
 run_id: 9b7fd81cd5254c1897736fd090f678a2
 run_name: useful-bass-439
 run_uuid: 9b7fd81cd5254c1897736fd090f678a2

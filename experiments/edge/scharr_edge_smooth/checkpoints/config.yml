@@ -31,7 +31,7 @@ EXPERIMENT_NAME: Scharr Edge Smooth External + Block  # experiment name
 # - Leave it empty to allow MLflow to automatically handle the run ID by default.
 # - Example Empty value: MLFLOW_RUN_ID:  
 # - Example with run ID: MLFLOW_RUN_ID: 1eb8039733de4d4eb0a6d9ddc260d04 (This value was copied from the MLflow UI)
-MLFLOW_RUN_ID:  
+MLFLOW_RUN_ID: b109200f492a4732953787fb2d69cee0
 LOG_INTERVAL: 20              # how many iterations to wait before logging training status to the termjinal and mlflow
 
 LR: 0.0001                    # learning rate
